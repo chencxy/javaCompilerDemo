@@ -14,13 +14,19 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.ToolProvider;
 
+/**
+ * 
+ * @author cxy
+ *
+ * dynamic compile java source file and define a Class<?>
+ */
 public class DynamicCompiler {
 	private JavaCompiler javac;
 	private Iterable<String> options;
 	boolean ignoreWarnings = false;
 	private String classPath;
 
-	private Map<String, SourceCode> sourceCodes = new HashMap<String, SourceCode>();
+	private Map<String, StringJavaFileObject> sourceCodes = new HashMap<String, StringJavaFileObject>();
 
 	public static DynamicCompiler newInstance() {
 		return new DynamicCompiler();
@@ -57,7 +63,7 @@ public class DynamicCompiler {
 		
 		DiagnosticCollector<JavaFileObject> collector = new DiagnosticCollector<>();
 		DynamicClassLoader classLoader = new DynamicClassLoader(getClass().getClassLoader(), classPath);
-		DynamicJavaFileManager fileManager = new DynamicJavaFileManager(javac.getStandardFileManager(null, null, null), classLoader, classPath);
+		DynamicJavaFileManager fileManager = new DynamicJavaFileManager(javac.getStandardFileManager(null, null, null), classLoader);
 		JavaCompiler.CompilationTask task = javac.getTask(null, fileManager, collector, options, null, compilationUnits);
 		boolean result = task.call();
 		if (!result || collector.getDiagnostics().size() > 0) {
@@ -116,7 +122,7 @@ public class DynamicCompiler {
 	 * @see {@link #compileAll()}
 	 */
 	public DynamicCompiler addSource(String className, String sourceCode) throws Exception {
-		sourceCodes.put(className, new SourceCode(className, sourceCode));
+		sourceCodes.put(className, new StringJavaFileObject(className, sourceCode));
 		return this;
 	}
 }
