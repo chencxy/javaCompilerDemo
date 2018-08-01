@@ -4,6 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -83,6 +86,10 @@ public class DynamicClassLoader extends ClassLoader {
 						            zfia.getFileObject(TEST_ENTRY_NAME.dirname(),
 						                                   TEST_ENTRY_NAME.basename());
 						    thirdPartJavaFileObjects.add(jfo);
+						    
+//						    JavaFileObject object = jarEntryToJavaFileObject(f, entry);
+//						    if(object != null)
+//						    	thirdPartJavaFileObjects.add(object);
 				        }
 				    }
 				    jis.close();
@@ -91,6 +98,19 @@ public class DynamicClassLoader extends ClassLoader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private JavaFileObject jarEntryToJavaFileObject(File jarFile, JarEntry entry) {
+		try {
+			URL url = new URL("jar", null, jarFile.getAbsolutePath().replaceAll("\\\\", "/") + "!/" + entry.getName());
+			return new JarEntryJavaFileObject(url, entry.getName());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	private String convertResourcePathToClassName(final String pName) {
